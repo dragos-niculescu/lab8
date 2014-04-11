@@ -6,13 +6,20 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
@@ -216,22 +223,46 @@ public class MainActivity extends Activity {
 						String response = null;
 						HttpClient client = new DefaultHttpClient();  
 						//HttpGet get = new HttpGet("http://wifi.elcom.pub.ro/pdsd/expr_get.php?op=plus&t1=3&t2=11");
-						HttpGet get = new HttpGet(friendId);
+						//HttpGet post = new HttpGet("http://wifi.elcom.pub.ro/pdsd/expr_post.php");
+						
 						
 						//ResponseHandler<String> handler = new BasicResponseHandler();
+						
+						if(false){ //GET
+							try {
+								HttpGet get = new HttpGet(friendId);
+								HttpResponse response_get = client.execute(get);
+								HttpEntity response_entity = response_get.getEntity();
+								response = EntityUtils.toString(response_entity); 
+								Log.i("RESPONSE", response);
+							} 
+							catch (ClientProtocolException e){
+								e.printStackTrace();
+							} catch (IOException e){
+								e.printStackTrace();
+							}
+						} else { // POST
+							try {
+								HttpPost post = new HttpPost(friendId);  
 
-						try {  
-							HttpResponse response_get = client.execute(get);
-							HttpEntity response_entity = response_get.getEntity();
-							response = EntityUtils.toString(response_entity); 
-							Log.i("RESPONSE", response);
-						} 
-						catch (ClientProtocolException e){
-							e.printStackTrace();
-						} catch (IOException e){
-							e.printStackTrace();
+								List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+								params.add(new BasicNameValuePair("op", "minus"));
+								params.add(new BasicNameValuePair("t1", "3.3"));
+								params.add(new BasicNameValuePair("t2", "1.5"));
+
+								UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params, HTTP.UTF_8);
+								post.setEntity(ent);
+
+								HttpResponse responsePOST = client.execute(post);  
+								HttpEntity rasp_entity= responsePOST.getEntity();  
+								if (rasp_entity!= null) {    
+									response = EntityUtils.toString(rasp_entity);
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
-
 						// We need a final local variable in order to access it from an inner class.
 						final String response_field = response;
 

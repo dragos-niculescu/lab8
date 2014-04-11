@@ -41,8 +41,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/response"
         android:layout_alignLeft="@+id/response"
-        android:layout_marginBottom="54
-        android:text="Get greeting" />
+        android:text="GET"
+        />
 
     <EditText
         android:id="@+id/friend_identity"
