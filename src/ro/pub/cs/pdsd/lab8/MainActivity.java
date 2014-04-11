@@ -21,6 +21,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -228,7 +231,7 @@ public class MainActivity extends Activity {
 						
 						//ResponseHandler<String> handler = new BasicResponseHandler();
 						
-						if(false){ //GET
+						if(true){ //GET
 							try {
 								HttpGet get = new HttpGet(friendId);
 								HttpResponse response_get = client.execute(get);
@@ -262,7 +265,20 @@ public class MainActivity extends Activity {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-						}
+						}//POST 
+						
+						//JSOUP
+						String html = "<html><head><title>First parse</title></head>"
+								  + "<body><p>Parsed HTML into a doc.</p><p>Something</p><img src=\"adresa.jpg\"></img></body></html>";
+								 
+								Document doc = Jsoup.parse(html);  //creaza documentul
+								Element e=doc.child(0);  // obtinem elementul html,fiu al documentului, care contine intreaga ierarhie
+								Element e2=e.child(1); // obtinem cel de-al doilea fiu al html-ului, adica body
+								Element e3=e2.child(0); // otinem primul fiu al lui body, adica primul paragraf
+								response = e3.text();   // afisam valoarea paragrafului, adica "Parsed HTML into a doc."
+								 
+						//JSOUP
+						
 						// We need a final local variable in order to access it from an inner class.
 						final String response_field = response;
 
