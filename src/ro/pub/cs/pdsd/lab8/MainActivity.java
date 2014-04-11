@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,6 +36,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -223,6 +227,8 @@ public class MainActivity extends Activity {
 					public void run() {
 
 						final EditText responseGreetingField = (EditText)findViewById(R.id.response);
+						final ImageView Image1 = (ImageView)findViewById(R.id.imageView1);
+						
 						String response = null;
 						HttpClient client = new DefaultHttpClient();  
 						//HttpGet get = new HttpGet("http://wifi.elcom.pub.ro/pdsd/expr_get.php?op=plus&t1=3&t2=11");
@@ -268,21 +274,51 @@ public class MainActivity extends Activity {
 						}//POST 
 						
 						//JSOUP
-						String html = "<html><head><title>First parse</title></head>"
-								  + "<body><p>Parsed HTML into a doc.</p><p>Something</p><img src=\"adresa.jpg\"></img></body></html>";
-								 
-								Document doc = Jsoup.parse(html);  //creaza documentul
-								Element e=doc.child(0);  // obtinem elementul html,fiu al documentului, care contine intreaga ierarhie
-								Element e2=e.child(1); // obtinem cel de-al doilea fiu al html-ului, adica body
-								Element e3=e2.child(0); // otinem primul fiu al lui body, adica primul paragraf
-								response = e3.text();   // afisam valoarea paragrafului, adica "Parsed HTML into a doc."
-								 
+						 
+						
+						try {
+							HttpGet get = new HttpGet("http://xkcd.com");
+							HttpResponse response_get = client.execute(get);
+							HttpEntity response_entity = response_get.getEntity();
+							String html = EntityUtils.toString(response_entity); 
+
+							Document doc = Jsoup.parse(html);  //creaza documentul
+							response = "";
+							for ( Element div:doc.getElementsByAttributeValue("id", "comic")){
+								response = div.child(0).absUrl("src");
+							}							
+						} 
+						catch (ClientProtocolException e){
+							e.printStackTrace();
+						} catch (IOException e){
+							e.printStackTrace();
+						}
+
+				      
 						//JSOUP
 						
 						// We need a final local variable in order to access it from an inner class.
 						final String response_field = response;
-
+						Bitmap bitmap1 = null; 
+						try{
+							bitmap1 = BitmapFactory.decodeStream(new URL(response).openStream());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						final Bitmap bitmap = bitmap1; 	
 						// Do the UI update.
+						Image1.post(new Runnable() {
+							@Override
+							public void run() {
+								if (response_field != null) {
+									// Set the contents of the text field to the received response.
+									Image1.setImageBitmap(bitmap);
+								} else {
+									Toast.makeText(MainActivity.this, "Your friend said nothing.", Toast.LENGTH_SHORT).show();
+								}
+							}	
+						});
+						
 						responseGreetingField.post(new Runnable() {
 							@Override
 							public void run() {
